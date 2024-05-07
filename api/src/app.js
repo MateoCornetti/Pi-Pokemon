@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const routes = require('./routes/index.js');
+const timeout = require('connect-timeout');
 require('./db.js');
 
 const server = express();
@@ -11,8 +12,9 @@ const server = express();
 const { URL_PATH_ACC_ORIGIN } = process.env;
 server.name = 'API';
 
-server.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-server.use(bodyParser.json({ limit: '50mb' }));
+server.use(timeout(60000));
+server.use(bodyParser.urlencoded({ extended: true, limit: '500mb' }));
+server.use(bodyParser.json({ limit: '500mb' }));
 server.use(cookieParser());
 server.use(morgan('dev'));
 server.use((req, res, next) => {

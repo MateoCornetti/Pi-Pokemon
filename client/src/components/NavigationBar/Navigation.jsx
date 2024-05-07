@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 import { filterPokemons, orderPokemons, searchPokemon, getTypes, filterPokemonsByType } from "../../redux/actions"
 import { connect } from "react-redux"
 
-const Fondo = styled.div `
+const Fondo = styled.div`
    display: flex;
    justify-content: space-between;
    align-content: center;
@@ -31,11 +31,11 @@ const Selector = styled.select`
   padding-left: 0.5em;
   box-shadow: -2px 2px 10px rgba(32, 32, 32, 0.5);
 `;
-const Cabecera = styled.div `
+const Cabecera = styled.div`
    justify-content: start;
    padding-top: 1em;
 `
-const BotonTitulo = styled.button `
+const BotonTitulo = styled.button`
    padding-bottom: 50px;
    background-color: transparent;
    border-width: 0em;
@@ -46,11 +46,11 @@ const BotonTitulo = styled.button `
    font-size: 3em;
    cursor: pointer;
 `
-const Botonera = styled.div `
+const Botonera = styled.div`
    align-items: center;
    left: 60%;
 `
-const Botones = styled.button `
+const Botones = styled.button`
    background-color: #e8ffdf;
    color: #90aa86;
    box-shadow: -2px 2px 10px rgba(32, 32, 32, 0.5);
@@ -70,7 +70,7 @@ const Botones = styled.button `
       color: #e8ffdf;
    };
 `
-const Botones3 = styled.button `
+const Botones3 = styled.button`
    background-color: #e8ffdf;
    color: #90aa86;
    box-shadow: -2px 2px 10px rgba(32, 32, 32, 0.5);
@@ -90,31 +90,31 @@ const Botones3 = styled.button `
    };
 `
 
-const Texto = styled.div `
+const Texto = styled.div`
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
    color: #214094;
    font-size: 20px;
 `
-const Filtros = styled.div `
+const Filtros = styled.div`
    display: flex;
    flex-direction: column;
    margin-top: 1px;
    align-items: center;
 `
-const FiltrosA = styled.div `
+const FiltrosA = styled.div`
    display: flex;
    flex-direction: row;
    margin: 5px;
    justify-content: center;
    align-items: center;
 `
-const FiltrosB = styled.div `
+const FiltrosB = styled.div`
    display: flex;
    margin-top: 5px;
    justify-content: center;
    align-items: center;
 `
-const Botones2 = styled.button `
+const Botones2 = styled.button`
    background-color: #e8ffdf;
    color: #90aa86;
    box-shadow: -2px 2px 10px rgba(32, 32, 32, 0.5);
@@ -133,7 +133,7 @@ const Botones2 = styled.button `
       color: #e8ffdf;
    };
 `
-const Busqueda = styled.input `
+const Busqueda = styled.input`
    background-color: #e9e9e9;
    font-size: 22px;
    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
@@ -147,10 +147,10 @@ const Busqueda = styled.input `
    padding-left: 2em;
    box-shadow: -2px 2px 10px rgba(32, 32, 32, 0.5);
 `
-const Buscador = styled.div `
+const Buscador = styled.div`
    display: flex;
 `
-function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes }) {
+function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes, filterPokemonsByType }) {
    const [filter, setFilter] = useState("");
    const [search, setSearch] = useState("");
    const [select, setSelect] = useState([]);
@@ -168,7 +168,7 @@ function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes })
     const handleChangeTypes = (e) => {
       const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
       setSelect(selectedOptions);
-      filterPokemonsByType(selectedOptions); // Asegúrate de que esta función esté correctamente implementada
+      filterPokemonsByType(selectedOptions);
    };
 
    // Esto maneja la busqueda para que realize la busqueda al solo escribir, sin tener que tocar un boton
@@ -188,7 +188,14 @@ function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes })
    };
 
    const onFilter = (event) => {
-      filterPokemons(event.target.id);
+      const filterId = event.target.id;
+      if (filterId === "reset") {
+         // Si el botón de reset es clicado, resetea el filtro por tipo
+         setSelect([]);
+         filterPokemons("allP");
+      } else {
+         filterPokemons(filterId);
+      }
    };
    const onSort = (event) => {
       orderPokemons(event.target.id);
@@ -235,6 +242,7 @@ function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes })
                            ))
                         }
                      </Selector>
+                     <Botones2 id="allP" onClick={onFilter}>Reset</Botones2>
                      </FiltrosA> 
                      <Filtros>
                      <Botones2 id="created" onClick={onFilter}>Created</Botones2>                    
@@ -260,7 +268,6 @@ function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes })
                </Botonera> 
             <Botonera>
               <Link to={'/Form'}><Botones>New</Botones></Link>
-              <Link to={'/About'}><Botones>About</Botones></Link>
             </Botonera>
          </Fondo>
       </nav>
@@ -285,6 +292,9 @@ const mapStateToProps = (state) => {
      },
      searchPokemon: (pokemon) => {
        dispatch(searchPokemon(pokemon));
+     },
+     filterPokemonsByType: (types) => {
+       dispatch(filterPokemonsByType(types));
      },
    };
  };

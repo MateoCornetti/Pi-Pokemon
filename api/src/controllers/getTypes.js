@@ -1,6 +1,6 @@
 const axios = require('axios')
 const { URL_PATH_API } = process.env;
-const { Types } = require('../db')
+const { Type } = require('../db')
 
 const cache = {};
 
@@ -31,8 +31,15 @@ const getTypes = async (req, res) => {
         // Convertir el conjunto a un array
         const types = Array.from(typesSet);
 
-        cache.types = types;
-
+        if (!cache.types) {
+            cache.types = types;
+        }
+        
+        const DBTypes = Type.findAll();
+        if (DBTypes.length === 0) {
+            DBTypes = types.map(type => {return {types: type}})
+            Type.bulkCreate(DBTypes)
+        }
         res.status(200).json({ types });
     } catch (error) {
         res.status(400).json({ error: error.message });

@@ -7,7 +7,6 @@ import Home from './components/HomePage/Home';
 import GlobalStyles from './components/Font/Font';
 import Nav from './components/NavigationBar/Navigation'
 import Detail from './components/Detail/Detail';
-import About from './components/About/About';
 import Form from './components/Form/Form';
 
 function App() {
@@ -20,7 +19,6 @@ function App() {
         <Route exact path='/' component={Landing} />
         <Route path="/Home" component={Home} />
         <Route path='/Detail/:id' component={Detail} />
-        <Route path='/About' component={About} />
         <Route path='/Form' component={Form} />  
       </Router>
     </div>

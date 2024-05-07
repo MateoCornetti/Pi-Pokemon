@@ -3,11 +3,17 @@ const axios = require('axios');
 const { URL_PATH_API } = process.env
 const { Pokemon, Type } = require('../db')
 
+const cache = {}
+
 const getPokemons = async (req, res) => {
     try {
+        if (cache.pokemons) {
+            console.log('Pokemons encontrados en caché');
+            return res.status(200).json(cache.pokemons);
+        }
+        console.log('no hay pokemones en cache');
         // Busca en la API
         const search = await axios.get(URL_PATH_API);
-
         let pokemons_api = await Promise.all(
             search.data.results.map(async (pokemon) => {
                 const data = await axios.get(pokemon.url);
@@ -45,7 +51,7 @@ const getPokemons = async (req, res) => {
                 };
             })
         );
-
+        console.log(pokemons_api, 'pokemones de la api');
         // Busca en la base de datos
         let pokemons_db_search = await Pokemon.findAll({include: {model: Type}});
         if (pokemons_db_search.length !== 0) {
@@ -80,6 +86,11 @@ const getPokemons = async (req, res) => {
                 types,
             }
         })
+        console.log(pokemons_db, 'pokemons de la db');
+        
+        if (!cache.pokemons) {
+            cache.pokemons = { "api": pokemons_api, "created": pokemons_db}
+        }
         let pokemons= { "api": pokemons_api, "created": pokemons_db};
         res.status(200).json(pokemons);
     } catch (error) {

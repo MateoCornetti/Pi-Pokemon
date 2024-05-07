@@ -13,8 +13,8 @@ const initialState = {
   types: [],
   APICards: [],
   DBCards: [],
-  allCards: [], // Mantén todos los pokemones aquí
-  filteredCards: [], // Mantén los pokemones filtrados aquí
+  allCards: [], 
+  allCardsUnfiltered: [],
   currentPage: 1,
   cardsPerPage: 12,
   filters: 'allP',
@@ -25,34 +25,36 @@ const initialState = {
 };
 
 const filter = (state, action) => {
-  let filteredCards = [];
-  if (action.payload === "allP") {
-    filteredCards = [...state.allCardsUnfiltered];
-  } else if (action.payload === "created") {
-    filteredCards = [...state.createdCards];
-  } else if (action.payload === "api") {
-    filteredCards = [...state.apiCards];
+  // Filtra las razas mostradas segun si son de la base de datos (created) o si son de la api, o si muestra todas (allB)
+  let filterBreeds = [...state.allCards];
+  if (action.payload === "allB" || action.payload === "created" || action.payload === "api") {
+    if (action.payload === "created") filterBreeds = filterBreeds.filter((element) => isNaN(element.id));
+    if (action.payload === "api") filterBreeds = filterBreeds.filter((element) => !isNaN(element.id));
+    return {
+      ...state,
+      allCards: filterBreeds,
+      filters: { ...state.filters, filters: action.payload },
+    };
   } else {
-    return state;
+    if (state.filters === "created") filterBreeds = filterBreeds.filter((element) => isNaN(element.id));
+    if (state.filters === "api") filterBreeds = filterBreeds.filter((element) => !isNaN(element.id));
+    return {
+      ...state,
+      allCards: filterBreeds,
+      filters: { ...state.filters },
+    };
   }
-  return {
-    ...state,
-    allCards: filteredCards,
-    filters: { ...state.filters, filters: action.payload },
-  };
-  
 };
 
 const filterByType = (state, action) => {
-  console.log(action.payload);
-  const { allCards } = state; // Usa allCards en lugar de filteredCards
-  const typesCards = allCards.filter((pokemon) => {
-    return pokemon.types.includes(action.payload);
+  const { allCards } = state;
+  const filteredCards = allCards.filter((pokemon) => {
+    return action.payload.every((type) => pokemon.types.includes(type));
   });
 
   return {
     ...state,
-    filteredCards: typesCards, // Actualiza filteredCards en lugar de allCards
+    allCards: filteredCards,
   };
 };
 
@@ -70,18 +72,46 @@ const orderBy = (arr, property, order) => {
 
 const rootReducer = (state = initialState, action) => {
   switch (action.type) {
-    case SET_ALL_CARDS:
-      const { created, api } = action.payload;
-      if (Array.isArray(created) && Array.isArray(api)) {
+    case FILTER:
+      if (action.payload === "allP") {
+        // Restaura los breeds a la copia no filtrada
         return {
           ...state,
-          allCardsUnfiltered: [...api, ...created],
-          createdCards: [...created],
-          apiCards: [...api],
+          allCards: [...state.allCardsUnfiltered],
         };
-      } else {
-        return state;
       }
+      else if (action.payload === "created") {
+        return {
+          ...state,
+          allCards: [...state.DBCards],
+        };
+      }
+      else if (action.payload === "api") {
+        return {
+          ...state,
+          allCards: [...state.APICards],
+        };
+      }
+      return filter(state, action);
+    case FILTER_BY_TYPE:
+      console.log(action.payload);
+      return filterByType(state, action);
+    case SET_ALL_CARDS:
+        const {created, api} = action.payload
+        if (Array.isArray(created) && Array.isArray(api)) {
+          return {
+            ...state,
+            allCardsUnfiltered: [...api, ...created],
+            allCards: [...api, ...created],
+            DBCards: [...created],
+            APICards: [...api],
+            };
+        }
+        else {
+          return {
+            ...state,
+          }
+        }
     case SEARCH_POKEMON:
       if (action.payload === "allB") {
         return {
@@ -109,11 +139,7 @@ const rootReducer = (state = initialState, action) => {
         };
       }
       break;
-    case FILTER:
-      return filter(state, action);
-    case FILTER_BY_TYPE:
-      console.log(action.payload);
-      return filterByType(state, action);
+    
     case ORDER:
       return {
         ...state,
@@ -135,4 +161,3 @@ const rootReducer = (state = initialState, action) => {
 };
 
 export default rootReducer;
-  

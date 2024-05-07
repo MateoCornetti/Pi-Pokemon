@@ -28,7 +28,7 @@ const postPokemon = async (req, res) => {
           where: { type: typeName },
         });
         if (types) {
-          await newPokemon.addTemperament(type);
+          await newPokemon.addType(type);
         }
       }
     }

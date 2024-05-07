@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import Cards from '../Cards/Cards';
@@ -52,13 +52,18 @@ const Separador = styled.div`
 
 const Home = ({ allCards, currentPage, cardsPerPage, getAllPokemons, setCurrentPage }) => {
   const [dataLoaded, setDataLoaded] = useState(false);
-  // Verifica si estan cargados los pokemones y sino ejecuta la funcion para cargarlas
+
+  const fetchAllPokemons = useCallback(() => {
+    getAllPokemons();
+  }, [getAllPokemons]);
+
   useEffect(() => {
-    if (allCards.length === 0) {
+    // Verifica si ya se cargaron los pokemones
+    if (!dataLoaded) {
       const delay = 8000; // 10 segundos
   
       const fetchData = async () => {
-        await getAllPokemons(); // Espera a que se complete la llamada a getAllPokemons()
+        await fetchAllPokemons(); // Espera a que se complete la llamada a getAllPokemons()
         const timeout = setTimeout(() => {
           setDataLoaded(true); // Establece dataLoaded en true después de 10 segundos
         }, delay);
@@ -72,8 +77,8 @@ const Home = ({ allCards, currentPage, cardsPerPage, getAllPokemons, setCurrentP
       };
     
       fetchDataAndSetTimeout();
-    } 
-  }, [getAllPokemons, allCards, dataLoaded]);
+    }
+  }, [fetchAllPokemons, dataLoaded]);
 
   // Calcula el número total de páginas
   const totalPages = Math.ceil(allCards.length / cardsPerPage);
