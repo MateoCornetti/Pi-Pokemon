@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
     image: {
       type:DataTypes.STRING,
     },
-    life: {
+    hp: {
       type:DataTypes.STRING,
     },
     attack: {

@@ -27,10 +27,29 @@ export const getTypes = () => {
   };
 };
 
-export const searchPokemon = (pokemon) => {
-  return {
-    type: SEARCH_POKEMON,
-    payload: pokemon,
+export const searchPokemon = (pokemonName) => {
+  return async (dispatch) => {
+    try {
+      // Realiza la petición a la API para buscar el Pokémon
+      const response = await fetch(`${ReactApi}/pokemon/name/${pokemonName}`);
+      
+      // Verifica el estado de la respuesta
+      if (response.ok) {
+        const data = await response.json();
+        // Si se encontró el Pokémon, actualiza el estado con el resultado
+        dispatch({
+          type: SEARCH_POKEMON,
+          payload: data,
+        });
+      } else {
+        // Si hay algún error, maneja la respuesta en consecuencia
+        alert("No hay pokemones con ese nombre (el nombre debe ser exacto)")
+        console.error('Error en la búsqueda del Pokémon:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error en la búsqueda del Pokémon:', error);
+      // Aquí puedes manejar los errores, por ejemplo, mostrar un mensaje al usuario
+    }
   };
 };
 

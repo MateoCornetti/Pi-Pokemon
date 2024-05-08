@@ -154,6 +154,7 @@ function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes, f
    const [filter, setFilter] = useState("");
    const [search, setSearch] = useState("");
    const [select, setSelect] = useState([]);
+   const [searchTxt, setSearchTxt] = useState([])
    const [typesLoaded, setTypesLoaded] = useState(false); 
 
    useEffect(() => {
@@ -179,13 +180,21 @@ function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes, f
    const handleChange = (event) => {
       switch (event.target.id) {
          case "inputSearch":
-            setSearch(event.target.value);
-            if(event.target.value === "") filterPokemons("allP");
-            break;
+           setSearchTxt(event.target.value);
+           if (event.target.value === "") filterPokemons("allP");
+           break;
          default:
-            break;
-      }
+           break;
+       }
    };
+
+   // basicamente lo que te dice es que hagas todo igual pero que cuando se actualice el state "search" no dispares una action para cambiar
+   // la lista de pokemons, sino que la dispares con handleSearch que es lo que va a tener el botón de search 
+
+   const handleSearch = () => {
+      setSearch(searchTxt)
+      console.log("Performing search:", search);
+    };
 
    const onFilter = (event) => {
       const filterId = event.target.id;
@@ -259,10 +268,12 @@ function Nav ({ filterPokemons, orderPokemons, types, searchPokemon, getTypes, f
                         <Busqueda 
                         type="text"
                         placeholder="..."
-                        value={search || ""}
                         id="inputSearch"
                         autoComplete="off"
-                        onChange={handleChange} />
+                        value={searchTxt || ""}
+                        onChange={handleChange}
+                         />
+                        <Botones2 onClick={handleSearch}>Search</Botones2>
                </Filtros>
                </Buscador>
                </Botonera> 

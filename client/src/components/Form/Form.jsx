@@ -161,10 +161,10 @@ const NewBreedForm = ({ types, createPokemon, getTypes }) => {
   const [formData, setFormData] = useState({
     name: '',
     image: '',
-    hp: '',
     attack: '',
     defense: '',
     speed: '',
+    hp: '',
     height: '',
     weight: '',
     types: [],
@@ -242,17 +242,18 @@ const handleChange = (e) => {
     if (!formData.height || !formData.weight) {
       alert('Falta dato de altura y/o peso del pokemon')
     }
-    if (!formData.types) {
+    if (formData.types.length === 0) {
       alert('Agrega al menos un tipo a tu pokemon')
     }
-    createPokemon(formData)
-    alert('Pokemon creado con éxito!');
+    else {
+      createPokemon(formData)
+    } 
   };
 
   return (
     <Cartita>
       <Titulo>Crear una nueva raza</Titulo>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <Divs>
           <DivA>
             <DivIndividual>
@@ -284,7 +285,7 @@ const handleChange = (e) => {
                 type="text"
                 name="attack"
                 placeholder="..."
-                value={formData.life_span}
+                value={formData.attack}
                 onChange={handleChange}
                 required
               />
@@ -295,7 +296,7 @@ const handleChange = (e) => {
                 type="text"
                 name="defense"
                 placeholder="..."
-                value={formData.life_span}
+                value={formData.defense}
                 onChange={handleChange}
                 required
               />
@@ -306,7 +307,7 @@ const handleChange = (e) => {
                 type="text"
                 name="speed"
                 placeholder="..."
-                value={formData.life_span}
+                value={formData.speed}
                 onChange={handleChange}
                 required
               />
@@ -319,7 +320,7 @@ const handleChange = (e) => {
                 type="text"
                 name="hp"
                 placeholder="..."
-                value={formData.life_span}
+                value={formData.hp}
                 onChange={handleChange}
                 required
               />

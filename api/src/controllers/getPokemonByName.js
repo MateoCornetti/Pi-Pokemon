@@ -48,46 +48,34 @@ const getPokemonByName = async (req, res) => {
             );
     
             // Busca en la base de datos
-            let pokemons_db_search = await Pokemon.findAll({include: {model: Type}});
-            if (pokemons_db_search.length !== 0) {
-                pokemons_db_search = pokemons_db_search.map(obj => obj.get({ plain: true }))
-                pokemons_db_search = pokemons_db_search.map(obj => {
-                    return ({ ...obj, "type": obj["Types"].map(e=>e.type).join(", ") })
-                  });
-              }
-            let pokemons_db = await pokemons_db_search.map((pokemon) => {
-                const {
-                    id,
-                    name,
-                    image,
-                    hp,
-                    attack,
-                    defense,
-                    speed,
-                    height,
-                    weight,
-                    types,
-                } = pokemon;
+            let pokemons_db_search = await Pokemon.findAll({ include: Type });
+            let pokemons_db = pokemons_db_search.map(pokemon => {
                 return {
-                    id,
-                    name,
-                    image,
-                    hp,
-                    attack,
-                    defense,
-                    speed,
-                    height,
-                    weight,
-                    types,
-                }
-            })
+                    id: pokemon.id,
+                    name: pokemon.name,
+                    image: pokemon.image,
+                    hp: pokemon.hp,
+                    attack: pokemon.attack,
+                    defense: pokemon.defense,
+                    speed: pokemon.speed,
+                    height: pokemon.height,
+                    weight: pokemon.weight,
+                    // Obtener los tipos para cada pokemón
+                    types: pokemon.Types.map(type => type.name) 
+                };
+            });
             let data= { "api": pokemons_api, "created": pokemons_db};
+            console.log("pokemon DB:", data.created);
   
-      if (data && data.api && Array.isArray(data.api)) {
-        const pokemonEncontrado = data.api.find(pokemon => pokemon.name === name.toLowerCase());
-  
+      if (data && data.api && data.created && Array.isArray(data.api) && Array.isArray(data.created)) {
+        let pokemonEncontrado = data.api.find(pokemon => pokemon.name === name.toLowerCase());
         if (pokemonEncontrado) {
           res.status(200).json(pokemonEncontrado);
+        } else if (!pokemonEncontrado) {
+          pokemonEncontrado = data.created.find(pokemon => pokemon.name === name.toLowerCase());
+          if (pokemonEncontrado) {
+            res.status(200).json(pokemonEncontrado);
+          }
         } else {
           res.status(404).json({ message: 'No se encontraron pokemones con ese nombre' });
         }

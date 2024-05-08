@@ -112,22 +112,13 @@ const rootReducer = (state = initialState, action) => {
             ...state,
           }
         }
+        
     case SEARCH_POKEMON:
-      if (action.payload === "allB") {
-        return {
-          ...state,
-          allCards: [...state.allCardsUnfiltered],
-        };
-      } else {
-        return {
-          ...state,
-          allCards: [
-            ...state.allCards.filter((element) =>
-              element.name.toString().toLowerCase().includes(action.payload.toString().toLowerCase())
-            ),
-          ],
-        };
-      }
+      // Devuelve el estado actualizado con el resultado de la búsqueda
+      return {
+        ...state,
+        allCards: [action.payload], // Reemplaza allCards con el resultado de la búsqueda
+      };
     case CREATE_POKEMON:
       if (action.payload.status === 400) {
         return {

@@ -7,11 +7,6 @@ const cache = {}
 
 const getPokemons = async (req, res) => {
     try {
-        if (cache.pokemons) {
-            console.log('Pokemons encontrados en caché');
-            return res.status(200).json(cache.pokemons);
-        }
-        console.log('no hay pokemones en cache');
         // Busca en la API
         const search = await axios.get(URL_PATH_API);
         let pokemons_api = await Promise.all(
@@ -51,46 +46,27 @@ const getPokemons = async (req, res) => {
                 };
             })
         );
-        console.log(pokemons_api, 'pokemones de la api');
         // Busca en la base de datos
-        let pokemons_db_search = await Pokemon.findAll({include: {model: Type}});
-        if (pokemons_db_search.length !== 0) {
-            pokemons_db_search = pokemons_db_search.map(obj => obj.get({ plain: true }))
-            pokemons_db_search = pokemons_db_search.map(obj => {
-                return ({ ...obj, "type": obj["Types"].map(e=>e.type).join(", ") })
-              });
-          }
-        let pokemons_db = await pokemons_db_search.map((pokemon) => {
-            const {
-                id,
-                name,
-                image,
-                hp,
-                attack,
-                defense,
-                speed,
-                height,
-                weight,
-                types,
-            } = pokemon;
+        let pokemons_db_search = await Pokemon.findAll({ include: Type });
+        let pokemons_db = pokemons_db_search.map(pokemon => {
             return {
-                id,
-                name,
-                image,
-                hp,
-                attack,
-                defense,
-                speed,
-                height,
-                weight,
-                types,
-            }
-        })
+                id: pokemon.id,
+                name: pokemon.name,
+                image: pokemon.image,
+                hp: pokemon.hp,
+                attack: pokemon.attack,
+                defense: pokemon.defense,
+                speed: pokemon.speed,
+                height: pokemon.height,
+                weight: pokemon.weight,
+                // Obtener los tipos para cada pokemón
+                types: pokemon.Types.map(type => type.name) 
+            };
+        });
         console.log(pokemons_db, 'pokemons de la db');
         
-        if (!cache.pokemons) {
-            cache.pokemons = { "api": pokemons_api, "created": pokemons_db}
-        }
+        cache.pokemons = { "api": pokemons_api, "created": pokemons_db}
+        
         let pokemons= { "api": pokemons_api, "created": pokemons_db};
         res.status(200).json(pokemons);
     } catch (error) {
@@ -102,31 +78,37 @@ const getPokemonById = async (req, res) => {
     const { id } = req.params;
     try {
         console.log(`Buscando pokemon con ID: ${id}`);
-        // Convertir el id a un entero
-        const pokemonId = parseInt(id, 10);
-        console.log(`ID convertido a entero: ${pokemonId}`);
 
-        // Buscar el pokemon por su id en el caché de la API
-        const pokemonFromApi = cache.pokemons.api.find(pokemon => pokemon.id === pokemonId);
-        if (pokemonFromApi) {
-            console.log(`Pokemon encontrado en el caché de la API.`);
-            return res.status(200).json(pokemonFromApi);
-        }
-
-        // Buscar el pokemon por su id en el caché de la base de datos
-        const pokemonFromDatabase = cache.pokemons.created.find(pokemon => pokemon.id === pokemonId);
-        if (pokemonFromDatabase) {
-            console.log(`Pokemon encontrado en el caché de la base de datos.`);
-            return res.status(200).json(pokemonFromDatabase);
+        // Verificar si el ID es un UUID válido
+        if (isValidUUID(id)) {
+            // Buscar el pokemon por su id en el caché de la base de datos
+            const pokemonFromDatabase = cache.pokemons.created.find(pokemon => pokemon.id === id);
+            if (pokemonFromDatabase) {
+                console.log(`Pokemon encontrado en el caché de la base de datos.`);
+                return res.status(200).json(pokemonFromDatabase);
+            }
+        } else {
+            // Buscar el pokemon por su id en el caché de la API
+            const pokemonFromApi = cache.pokemons.api.find(pokemon => pokemon.id === parseInt(id));
+            if (pokemonFromApi) {
+                console.log(`Pokemon encontrado en el caché de la API.`);
+                return res.status(200).json(pokemonFromApi);
+            }
         }
 
         // Si no se encuentra en ninguno de los cachés, lanzar un error
         console.log(`No se encontró el pokemon en el caché.`);
-        return res.status(404).json({ message: `No se encontró el pokemon con ID ${pokemonId} en el caché.` });
+        return res.status(404).json({ message: `No se encontró el pokemon con ID ${id} en el caché.` });
     } catch (error) {
         return res.status(500).json({ error: `Error al buscar el pokemon con id ${id}: ${error.message}` });
     }
 };
+
+// Función para verificar si un string es un UUID válido
+function isValidUUID(uuid) {
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    return uuidRegex.test(uuid);
+}
 
 module.exports = {
     getPokemons,

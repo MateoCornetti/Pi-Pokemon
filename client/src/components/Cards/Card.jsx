@@ -91,7 +91,7 @@ const ImgYNom = styled.div`
 function Card({name, id, image, types}) {
 
    // Asignamos una imagen por si no tiene imagen y determinamos que si el nombre tiene mas de 30 caracteres muestre los primeros 30 caracteres y le añada puntos suspensivos 
-   const defaultImg = '/images/default.jpg'
+   const defaultImg = "../images/default.jpg"
    const maxCaracteres = 30;
    const textoTruncado = name.length > maxCaracteres ? name.slice(0, maxCaracteres) + '...' : name;
 
